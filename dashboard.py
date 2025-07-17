@@ -14,7 +14,7 @@ menu_pilihan = st.sidebar.radio(
 )
 
 # Path file Excel
-excel_path = r"D:\Tubes_Mosi\Tubes_Mosi.xlsx"
+excel_path = f"Tubes_Mosi.xlsx"
 
 @st.cache_data
 def load_excel_data(path):
