@@ -14,18 +14,25 @@ menu_pilihan = st.sidebar.radio(
 )
 
 # Path file Excel
-excel_path = f"Tubes_Mosi.xlsx"
+excel_path = "Tubes_Mosi.xlsx"
 
 @st.cache_data
 def load_excel_data(path):
     try:
-        df = pd.read_excel(path, sheet_name="DataTrain")
+        # Pakai engine openpyxl secara eksplisit
+        df = pd.read_excel(path, sheet_name="DataTrain", engine="openpyxl")
         return df
     except FileNotFoundError:
         st.error(f"❌ File tidak ditemukan di: {path}")
         return pd.DataFrame()
     except ValueError as e:
         st.error(f"❌ Gagal membaca sheet: {e}")
+        return pd.DataFrame()
+    except ImportError as e:
+        st.error(f"❌ Modul 'openpyxl' belum terinstal. Jalankan: pip install openpyxl")
+        return pd.DataFrame()
+    except Exception as e:
+        st.error(f"❌ Terjadi error saat membaca file: {e}")
         return pd.DataFrame()
 
 # Load data
@@ -53,23 +60,14 @@ elif menu_pilihan == "Frekuensi dan Interval":
     st.title("📈 Frekuensi dan Interval per Daerah")
 
     if not df.empty:
-        # Normalisasi nama kolom
         df.columns = df.columns.str.strip().str.lower()
-
-        # Kolom yang tidak termasuk daerah
         exclude_cols = ["id", "bulan", "tahun"]
         daerah_cols = [col for col in df.columns if col not in exclude_cols]
 
-        # Tambahkan opsi awal
         daerah_options = ["pilih daerah"] + daerah_cols
-
-        # Penjelasan awal
         st.markdown("_Silakan pilih salah satu daerah dari daftar untuk melihat distribusi frekuensi._")
-
-        # Selectbox dengan opsi awal dummy
         selected_daerah = st.selectbox("📍 Daftar Daerah:", daerah_options)
 
-        # Jika belum memilih daerah yang valid
         if selected_daerah == "pilih daerah":
             st.info("Pilih daerah terlebih dahulu untuk menampilkan distribusi frekuensi.")
         else:
@@ -121,7 +119,6 @@ elif menu_pilihan == "Frekuensi dan Interval":
             ]]
             st.dataframe(freq_table, use_container_width=True)
 
-            # Informasi tambahan (tanpa pre)
             st.markdown("---")
             st.markdown("### ℹ️ Informasi Tambahan")
             st.markdown(f"Jumlah Data (n): {n}")
